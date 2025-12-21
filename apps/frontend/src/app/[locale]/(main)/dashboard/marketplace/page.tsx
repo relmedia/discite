@@ -570,7 +570,7 @@ export default function MarketplacePage() {
                                   {option.type === LicenseType.SEAT && t("marketplace.seatDescription")}
                                   {option.type === LicenseType.UNLIMITED && t("marketplace.unlimitedDescription")}
                                   {option.type === LicenseType.TIME_LIMITED && 
-                                    t("marketplace.timeLimitedDescription", { months: option.durationMonths })}
+                                    t("marketplace.timeLimitedDescription", { months: option.durationMonths ?? 0 })}
                                 </p>
                                 {option.isSubscription && (
                                   <Badge variant="outline" className="mt-1">
