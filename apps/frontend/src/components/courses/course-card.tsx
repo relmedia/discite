@@ -52,7 +52,7 @@ export function CourseCard({ course, showProgress = false }: CourseCardProps) {
         <div className="text-muted-foreground mb-4 flex flex-wrap gap-4 text-xs">
           <div className="flex items-center gap-1">
             <Clock className="h-3.5 w-3.5" />
-            <span>{course.duration}</span>
+            <span>{course.durationHours}h</span>
           </div>
           <div className="flex items-center gap-1">
             <Users className="h-3.5 w-3.5" />
