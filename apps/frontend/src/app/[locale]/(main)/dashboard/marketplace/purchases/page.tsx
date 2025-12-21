@@ -128,7 +128,7 @@ export default function PurchasedCoursesPage() {
 
   const fetchAllUsers = async () => {
     try {
-      const data = await usersApi.getAllUsers();
+      const data = await usersApi.getUsers();
       setAllUsers(data);
     } catch (error) {
       console.error("Failed to fetch users:", error);
