@@ -356,6 +356,12 @@ export default function CoursePage() {
     durationMinutes?: number;
     isLocked?: boolean;
     progress?: { completed: boolean };
+    // Quiz-specific properties
+    questionsCount?: number;
+    bestScore?: number;
+    passingScore?: number;
+    canRetake?: boolean;
+    attemptsCount?: number;
   };
 
   const curriculumItems: CurriculumItem[] = isEnrolled
@@ -376,6 +382,11 @@ export default function CoursePage() {
           orderIndex: q.orderIndex,
           durationMinutes: q.durationMinutes,
           isLocked: q.isLocked,
+          questionsCount: q.questions?.length ?? 0,
+          bestScore: q.bestScore,
+          passingScore: q.passingScore,
+          canRetake: q.canRetake,
+          attemptsCount: q.attemptsCount,
         })),
       ].sort((a, b) => a.orderIndex - b.orderIndex)
     : [
@@ -606,16 +617,15 @@ export default function CoursePage() {
               <div className="space-y-2">
                 {curriculumItems.map((item, index) => {
                   if (item.type === 'lesson') {
-                    const lesson = item as LessonWithAccess & { type: 'lesson' };
                     return (
                       <div
-                        key={lesson.id}
+                        key={item.id}
                         className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-muted/50"
                       >
                         <div className="flex items-center gap-3">
-                          {lesson.progress?.completed ? (
+                          {item.progress?.completed ? (
                             <CheckCircle2 className="h-5 w-5 text-green-600" />
-                          ) : lesson.isLocked ? (
+                          ) : item.isLocked ? (
                             <Lock className="h-5 w-5 text-muted-foreground" />
                           ) : (
                             <div className="flex h-5 w-5 items-center justify-center rounded-full border text-xs">
@@ -623,37 +633,36 @@ export default function CoursePage() {
                             </div>
                           )}
                           <div>
-                            <p className="font-medium">{lesson.title}</p>
+                            <p className="font-medium">{item.title}</p>
                             <p className="text-muted-foreground text-sm flex items-center gap-2">
                               <BookOpen className="h-3 w-3" />
-                              {t("courses.lesson")} • {lesson.durationMinutes} {t("courses.min")}
+                              {t("courses.lesson")} • {item.durationMinutes} {t("courses.min")}
                             </p>
                           </div>
                         </div>
-                        {isEnrolled && !lesson.isLocked && (
+                        {isEnrolled && !item.isLocked && (
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleOpenLesson(lesson.id)}
+                            onClick={() => handleOpenLesson(item.id)}
                           >
                             <PlayCircle className="mr-2 h-4 w-4" />
-                            {lesson.progress?.completed ? t("common.review") : t("courses.start")}
+                            {item.progress?.completed ? t("common.review") : t("courses.start")}
                           </Button>
                         )}
                       </div>
                     );
                   } else {
-                    const quiz = item as QuizWithAccess & { type: 'quiz' };
-                    const quizPassed = quiz.bestScore !== undefined && quiz.bestScore >= quiz.passingScore;
+                    const quizPassed = item.bestScore !== undefined && item.passingScore !== undefined && item.bestScore >= item.passingScore;
                     return (
                       <div
-                        key={quiz.id}
+                        key={item.id}
                         className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-muted/50"
                       >
                         <div className="flex items-center gap-3">
                           {quizPassed ? (
                             <CheckCircle2 className="h-5 w-5 text-green-600" />
-                          ) : quiz.isLocked ? (
+                          ) : item.isLocked ? (
                             <Lock className="h-5 w-5 text-muted-foreground" />
                           ) : (
                             <div className="flex h-5 w-5 items-center justify-center rounded-full border text-xs">
@@ -661,25 +670,25 @@ export default function CoursePage() {
                             </div>
                           )}
                           <div>
-                            <p className="font-medium">{quiz.title}</p>
+                            <p className="font-medium">{item.title}</p>
                             <p className="text-muted-foreground text-sm flex items-center gap-2">
                               <FileQuestion className="h-3 w-3" />
-                              {t("courses.quiz")} • {quiz.questions.length} {t("courses.questions")}
-                              {quiz.bestScore !== undefined && (
-                                <span> • {t("courses.best")}: {quiz.bestScore}%</span>
+                              {t("courses.quiz")} • {item.questionsCount ?? 0} {t("courses.questions")}
+                              {item.bestScore !== undefined && (
+                                <span> • {t("courses.best")}: {item.bestScore}%</span>
                               )}
                             </p>
                           </div>
                         </div>
-                        {isEnrolled && !quiz.isLocked && (
+                        {isEnrolled && !item.isLocked && (
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleOpenQuiz(quiz.id)}
-                            disabled={!quiz.canRetake && quizPassed}
+                            onClick={() => handleOpenQuiz(item.id)}
+                            disabled={!item.canRetake && quizPassed}
                           >
                             <FileQuestion className="mr-2 h-4 w-4" />
-                            {quizPassed ? t("common.review") : quiz.attemptsCount && quiz.attemptsCount > 0 ? t("courses.retake") : t("courses.takeQuiz")}
+                            {quizPassed ? t("common.review") : item.attemptsCount && item.attemptsCount > 0 ? t("courses.retake") : t("courses.takeQuiz")}
                           </Button>
                         )}
                       </div>
