@@ -559,7 +559,7 @@ export default function PurchasedCoursesPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>{t("marketplace.revokeAccess")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t("marketplace.revokeAccessConfirm", { name: accessToRevoke?.userName })}
+              {t("marketplace.revokeAccessConfirm", { name: accessToRevoke?.userName ?? "" })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="py-4">
