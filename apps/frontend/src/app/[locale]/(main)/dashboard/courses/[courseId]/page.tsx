@@ -353,17 +353,17 @@ export default function CoursePage() {
     | (QuizWithAccess & { type: 'quiz' });
 
   const curriculumItems: CurriculumItem[] = isEnrolled
-    ? [
+    ? ([
         ...courseLessons.map(l => ({ ...l, type: 'lesson' as const })),
         ...courseQuizzes.map(q => ({ ...q, type: 'quiz' as const })),
-      ].sort((a, b) => a.orderIndex - b.orderIndex)
-    : [
-        { id: "1", title: "Introduction to the Course", durationMinutes: 15, progress: { completed: false }, type: 'lesson' as const },
-        { id: "2", title: "Getting Started", durationMinutes: 20, progress: { completed: false }, type: 'lesson' as const },
-        { id: "3", title: "Core Concepts", durationMinutes: 30, progress: { completed: false }, type: 'lesson' as const },
-        { id: "4", title: "Practical Examples", durationMinutes: 45, progress: { completed: false }, type: 'lesson' as const },
-        { id: "5", title: "Advanced Topics", durationMinutes: 35, progress: { completed: false }, type: 'lesson' as const },
-      ];
+      ] as CurriculumItem[]).sort((a, b) => a.orderIndex - b.orderIndex)
+    : ([
+        { id: "1", title: "Introduction to the Course", durationMinutes: 15, orderIndex: 0, progress: { completed: false }, type: 'lesson' as const },
+        { id: "2", title: "Getting Started", durationMinutes: 20, orderIndex: 1, progress: { completed: false }, type: 'lesson' as const },
+        { id: "3", title: "Core Concepts", durationMinutes: 30, orderIndex: 2, progress: { completed: false }, type: 'lesson' as const },
+        { id: "4", title: "Practical Examples", durationMinutes: 45, orderIndex: 3, progress: { completed: false }, type: 'lesson' as const },
+        { id: "5", title: "Advanced Topics", durationMinutes: 35, orderIndex: 4, progress: { completed: false }, type: 'lesson' as const },
+      ] as CurriculumItem[]);
 
   const reviews = [
     {
