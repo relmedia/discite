@@ -88,7 +88,7 @@ export default function GroupsPage() {
 
   // Expandable rows state
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
-  const [groupMembers, setGroupMembers] = useState<Record<string, User[]>>({});
+  const [groupMembers, setGroupMembers] = useState<Record<string, { id: string; name: string; email: string; role: string }[]>>({});
   const [loadingMembers, setLoadingMembers] = useState<Set<string>>(new Set());
 
   // Create/Edit dialog state
