@@ -562,7 +562,7 @@ export default function OrganizationsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>{t("tenant.deleteOrganization")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t("tenant.deleteOrganizationWarning", { name: deleteTenant?.name })}
+              {t("tenant.deleteOrganizationWarning", { name: deleteTenant?.name ?? "" })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
