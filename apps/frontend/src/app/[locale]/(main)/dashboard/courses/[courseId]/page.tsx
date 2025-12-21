@@ -374,7 +374,7 @@ export default function CoursePage() {
           title: q.title, 
           type: 'quiz' as const, 
           orderIndex: q.orderIndex,
-          durationMinutes: q.timeLimit,
+          durationMinutes: q.durationMinutes,
           isLocked: q.isLocked,
         })),
       ].sort((a, b) => a.orderIndex - b.orderIndex)
