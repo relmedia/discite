@@ -41,9 +41,16 @@ async function updateSuperadmin() {
 
     const userRepository = dataSource.getRepository(UserEntity);
 
-    const NEW_EMAIL = process.env.SUPERADMIN_EMAIL || 'ariel@relmedia.no';
-    const NEW_PASSWORD = process.env.SUPERADMIN_PASSWORD || 'Prestastubben4@';
+    const NEW_EMAIL = process.env.SUPERADMIN_EMAIL;
+    const NEW_PASSWORD = process.env.SUPERADMIN_PASSWORD;
     const NEW_NAME = process.env.SUPERADMIN_NAME || 'SuperAdmin';
+
+    if (!NEW_EMAIL || !NEW_PASSWORD) {
+      console.error('❌ Missing required environment variables: SUPERADMIN_EMAIL and SUPERADMIN_PASSWORD');
+      console.log('💡 Set these in your .env file or pass them as environment variables');
+      await dataSource.destroy();
+      process.exit(1);
+    }
 
     console.log('🔍 Looking for existing SUPERADMIN user...');
 
