@@ -348,22 +348,43 @@ export default function CoursePage() {
   };
 
   // Combine lessons and quizzes for curriculum display
-  type CurriculumItem = 
-    | (LessonWithAccess & { type: 'lesson' })
-    | (QuizWithAccess & { type: 'quiz' });
+  type CurriculumItem = {
+    id: string;
+    title: string;
+    type: 'lesson' | 'quiz';
+    orderIndex: number;
+    durationMinutes?: number;
+    isLocked?: boolean;
+    progress?: { completed: boolean };
+  };
 
   const curriculumItems: CurriculumItem[] = isEnrolled
-    ? ([
-        ...courseLessons.map(l => ({ ...l, type: 'lesson' as const })),
-        ...courseQuizzes.map(q => ({ ...q, type: 'quiz' as const })),
-      ] as CurriculumItem[]).sort((a, b) => a.orderIndex - b.orderIndex)
-    : ([
+    ? [
+        ...courseLessons.map(l => ({ 
+          id: l.id, 
+          title: l.title, 
+          type: 'lesson' as const, 
+          orderIndex: l.orderIndex,
+          durationMinutes: l.durationMinutes,
+          isLocked: l.isLocked,
+          progress: l.progress,
+        })),
+        ...courseQuizzes.map(q => ({ 
+          id: q.id, 
+          title: q.title, 
+          type: 'quiz' as const, 
+          orderIndex: q.orderIndex,
+          durationMinutes: q.timeLimit,
+          isLocked: q.isLocked,
+        })),
+      ].sort((a, b) => a.orderIndex - b.orderIndex)
+    : [
         { id: "1", title: "Introduction to the Course", durationMinutes: 15, orderIndex: 0, progress: { completed: false }, type: 'lesson' as const },
         { id: "2", title: "Getting Started", durationMinutes: 20, orderIndex: 1, progress: { completed: false }, type: 'lesson' as const },
         { id: "3", title: "Core Concepts", durationMinutes: 30, orderIndex: 2, progress: { completed: false }, type: 'lesson' as const },
         { id: "4", title: "Practical Examples", durationMinutes: 45, orderIndex: 3, progress: { completed: false }, type: 'lesson' as const },
         { id: "5", title: "Advanced Topics", durationMinutes: 35, orderIndex: 4, progress: { completed: false }, type: 'lesson' as const },
-      ] as CurriculumItem[]);
+      ];
 
   const reviews = [
     {
