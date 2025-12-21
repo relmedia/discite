@@ -1,23 +1,21 @@
 import { DataSource } from 'typeorm';
-import { ConfigService } from '@nestjs/config';
 import { config } from 'dotenv';
+import { resolve } from 'path';
 import { TenantEntity } from '../infrastructure/database/entities/tenant.entity';
 import { UserEntity } from '../infrastructure/database/entities/user.entity';
 import { GroupEntity } from '../infrastructure/database/entities/group.entity';
 import { runSeeds } from '../infrastructure/database/seeds';
 
-// Load environment variables
-config();
-
-const configService = new ConfigService();
+// Load environment variables from the backend .env file
+config({ path: resolve(__dirname, '../../.env') });
 
 const AppDataSource = new DataSource({
   type: 'postgres',
-  host: configService.get('DB_HOST', 'localhost'),
-  port: configService.get('DB_PORT', 5432),
-  username: configService.get('DB_USERNAME', 'postgres'),
-  password: configService.get('DB_PASSWORD', 'postgres'),
-  database: configService.get('DB_DATABASE', 'myapp'),
+  host: process.env.DB_HOST || 'localhost',
+  port: parseInt(process.env.DB_PORT || '5432', 10),
+  username: process.env.DB_USERNAME || 'postgres',
+  password: process.env.DB_PASSWORD || 'postgres',
+  database: process.env.DB_DATABASE || 'myapp',
   entities: [TenantEntity, UserEntity, GroupEntity],
   synchronize: false,
   logging: false,
