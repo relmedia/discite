@@ -1,0 +1,14 @@
+{
+    "extends": "./base.json",
+    "compilerOptions": {
+      "module": "commonjs",
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true,
+      "incremental": true,
+      "allowSyntheticDefaultImports": true,
+      "baseUrl": "./",
+      "paths": {
+        "@/*": ["src/*"]
+      }
+    }
+  }
