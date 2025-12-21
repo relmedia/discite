@@ -47,7 +47,7 @@ export default function MyCoursesPage() {
       try {
         setLoading(true);
         const data = await coursesApi.getMyEnrollments();
-        setEnrollments(data as EnrollmentWithCourse[]);
+        setEnrollments(data as unknown as EnrollmentWithCourse[]);
       } catch (err) {
         console.error("Failed to fetch enrollments:", err);
         setError(err instanceof Error ? err.message : "Failed to load courses");
