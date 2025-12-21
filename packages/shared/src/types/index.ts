@@ -95,6 +95,11 @@ export interface User {
     lessonsCount: number;
     quizzesCount: number;
     tags: string[];
+    // Certificate settings
+    enableCertificate?: boolean;
+    certificateTemplateId?: string;
+    certificateExpiryMonths?: number;
+    includeGradeOnCertificate?: boolean;
     createdAt: Date;
     updatedAt: Date;
   }
