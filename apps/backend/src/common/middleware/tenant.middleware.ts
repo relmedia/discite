@@ -20,8 +20,18 @@ export class TenantMiddleware implements NestMiddleware {
     const tenantCustomDomain = req.headers[TENANT_CUSTOM_DOMAIN_HEADER.toLowerCase()] as string;
 
     // Skip tenant validation for public endpoints
-    const publicPaths = ['/api/tenants', '/api/auth/login', '/api/auth/register'];
-    const isPublicPath = publicPaths.some((path) => req.path.startsWith(path));
+    // Check both req.path and req.originalUrl to handle various routing scenarios
+    const publicPaths = [
+      '/api/tenants',
+      '/api/auth/login',
+      '/api/auth/register',
+      '/api/auth/oauth',
+      '/api/auth/google',
+      '/api/marketplace',
+      '/api/payments/webhook',
+    ];
+    const requestPath = req.path || req.originalUrl || '';
+    const isPublicPath = publicPaths.some((path) => requestPath.startsWith(path));
 
     if (isPublicPath) {
       return next();
