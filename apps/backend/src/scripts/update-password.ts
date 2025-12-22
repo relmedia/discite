@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as dotenv from 'dotenv';
 import { resolve } from 'path';
+import { existsSync } from 'fs';
 import { UserEntity } from '../infrastructure/database/entities/user.entity';
 import { TenantEntity } from '../infrastructure/database/entities/tenant.entity';
 import { GroupEntity } from '../infrastructure/database/entities/group.entity';
@@ -12,7 +13,19 @@ import { QuizEntity } from '../infrastructure/database/entities/quiz.entity';
 import { EnrollmentEntity } from '../infrastructure/database/entities/enrollment.entity';
 
 // Load environment variables from the backend .env file
-dotenv.config({ path: resolve(__dirname, '../../.env') });
+const possibleEnvPaths = [
+  resolve(__dirname, '../../.env'),
+  resolve(__dirname, '../../../../../apps/backend/.env'),
+  resolve(process.cwd(), '.env'),
+  resolve(process.cwd(), 'apps/backend/.env'),
+];
+const envPath = possibleEnvPaths.find(p => existsSync(p));
+if (envPath) {
+  console.log(`Loading environment from: ${envPath}`);
+  dotenv.config({ path: envPath });
+} else {
+  dotenv.config();
+}
 
 async function updateSuperadminPassword() {
   // Create database connection
