@@ -2,17 +2,18 @@
 
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { ArrowLeft, CheckCircle2, Loader2, XCircle } from "lucide-react";
+import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { APP_CONFIG } from "@/config/app-config";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -27,7 +28,6 @@ const FormSchema = z
   });
 
 function ResetPasswordForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
@@ -91,67 +91,72 @@ function ResetPasswordForm() {
 
   if (isSuccess) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+      <>
+        <div className="mx-auto flex w-full flex-col justify-center space-y-8 sm:w-[350px]">
+          <div className="space-y-4 text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
               <CheckCircle2 className="h-8 w-8 text-green-600" />
             </div>
-            <CardTitle className="text-2xl">Password reset successful!</CardTitle>
-            <CardDescription>
+            <h1 className="text-2xl font-medium">Password reset successful!</h1>
+            <p className="text-muted-foreground text-sm">
               Your password has been updated. You can now login with your new password.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild className="w-full">
-              <Link href="/login">Go to login</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+            </p>
+          </div>
+          <Button asChild className="w-full">
+            <Link href="/login">Go to login</Link>
+          </Button>
+        </div>
+
+        <div className="absolute bottom-5 flex w-full justify-between px-10">
+          <div className="text-sm">{APP_CONFIG.copyright}</div>
+          <LanguageSwitcher variant="compact" />
+        </div>
+      </>
     );
   }
 
   if (error && !token) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+      <>
+        <div className="mx-auto flex w-full flex-col justify-center space-y-8 sm:w-[350px]">
+          <div className="space-y-4 text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
               <XCircle className="h-8 w-8 text-red-600" />
             </div>
-            <CardTitle className="text-2xl">Invalid reset link</CardTitle>
-            <CardDescription>{error}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+            <h1 className="text-2xl font-medium">Invalid reset link</h1>
+            <p className="text-muted-foreground text-sm">{error}</p>
+          </div>
+          <div className="space-y-3">
             <Button asChild className="w-full">
               <Link href="/forgot-password">Request new reset link</Link>
             </Button>
             <Button asChild variant="outline" className="w-full">
-              <Link href="/login">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to login
-              </Link>
+              <Link href="/login">Back to login</Link>
             </Button>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </div>
+
+        <div className="absolute bottom-5 flex w-full justify-between px-10">
+          <div className="text-sm">{APP_CONFIG.copyright}</div>
+          <LanguageSwitcher variant="compact" />
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl">Reset your password</CardTitle>
-          <CardDescription>Enter your new password below.</CardDescription>
-        </CardHeader>
-        <CardContent>
+    <>
+      <div className="mx-auto flex w-full flex-col justify-center space-y-8 sm:w-[350px]">
+        <div className="space-y-2 text-center">
+          <h1 className="text-2xl font-medium">Reset your password</h1>
+          <p className="text-muted-foreground text-sm">Enter your new password below.</p>
+        </div>
+        <div className="space-y-4">
+          {error && (
+            <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">{error}</div>
+          )}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {error && (
-                <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">{error}</div>
-              )}
               <FormField
                 control={form.control}
                 name="password"
@@ -200,17 +205,25 @@ function ResetPasswordForm() {
                   "Reset password"
                 )}
               </Button>
-              <Button asChild variant="ghost" className="w-full">
-                <Link href="/login">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to login
-                </Link>
-              </Button>
             </form>
           </Form>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </div>
+
+      <div className="absolute top-5 flex w-full justify-end px-10">
+        <div className="text-muted-foreground text-sm">
+          Remember your password?{" "}
+          <Link prefetch={false} className="text-foreground" href="/login">
+            Sign in
+          </Link>
+        </div>
+      </div>
+
+      <div className="absolute bottom-5 flex w-full justify-between px-10">
+        <div className="text-sm">{APP_CONFIG.copyright}</div>
+        <LanguageSwitcher variant="compact" />
+      </div>
+    </>
   );
 }
 
@@ -227,4 +240,3 @@ export default function ResetPasswordPage() {
     </Suspense>
   );
 }
-
