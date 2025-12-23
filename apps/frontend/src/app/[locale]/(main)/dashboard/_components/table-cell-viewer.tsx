@@ -60,7 +60,7 @@ export function TableCellViewer({ item }: { item: z.infer<typeof sectionSchema> 
         <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
           {!isMobile && (
             <>
-              <ChartContainer config={chartConfig}>
+              <ChartContainer config={chartConfig} className="h-[250px] w-full">
                 <AreaChart
                   accessibilityLayer
                   data={chartData}

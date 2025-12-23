@@ -210,7 +210,7 @@ export default function AnalyticsPage() {
                   color: 'hsl(var(--chart-1))',
                 },
               }}
-              className="h-[300px]"
+              className="h-[300px] w-full"
             >
               <LineChart data={metrics.userGrowth}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -262,7 +262,7 @@ export default function AnalyticsPage() {
                   color: 'hsl(var(--chart-2))',
                 },
               }}
-              className="h-[300px]"
+              className="h-[300px] w-full"
             >
               <BarChart data={metrics.enrollmentTrends}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -308,7 +308,7 @@ export default function AnalyticsPage() {
                   color: 'hsl(var(--chart-3))',
                 },
               }}
-              className="h-[300px]"
+              className="h-[300px] w-full"
             >
               <LineChart data={metrics.courseCompletionRates}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -359,7 +359,7 @@ export default function AnalyticsPage() {
                   label: 'Users',
                 },
               }}
-              className="h-[300px]"
+              className="h-[300px] w-full"
             >
               <PieChart>
                 <Pie
@@ -396,7 +396,7 @@ export default function AnalyticsPage() {
                   color: 'hsl(var(--chart-4))',
                 },
               }}
-              className="h-[300px]"
+              className="h-[300px] w-full"
             >
               <LineChart data={superadminMetrics.tenantGrowth}>
                 <CartesianGrid strokeDasharray="3 3" />
