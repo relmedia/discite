@@ -5,8 +5,10 @@ import Apple from "next-auth/providers/apple";
 import Credentials from "next-auth/providers/credentials";
 import type { NextAuthConfig } from "next-auth";
 
-// Backend API URL
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+// Backend API URL for server-side calls (Auth.js runs on server)
+// Use BACKEND_INTERNAL_URL for direct server-to-server communication
+// This bypasses nginx which routes /api/auth/* to Next.js
+const BACKEND_URL = process.env.BACKEND_INTERNAL_URL || "http://localhost:3001";
 
 export const authConfig: NextAuthConfig = {
   providers: [
