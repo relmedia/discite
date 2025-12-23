@@ -6,7 +6,7 @@ const locales = ['en', 'sv'] as const;
 const defaultLocale = 'sv';
 
 // Public routes that don't require authentication
-const publicRoutes = ['/login', '/register', '/api/auth'];
+const publicRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/api/auth'];
 
 // Your app's base domains - customize these for your deployment
 // These are domains that are NOT custom tenant domains
