@@ -79,21 +79,18 @@ export class UserService {
   }
 
   async updateUser(id: string, dto: UpdateUserDto, tenantId: string, currentUserRole: UserRole): Promise<UserEntity> {
-    // Only SUPERADMIN can manage public tenant users
-    let tenantIds = [tenantId];
-
+    // SUPERADMIN can manage any user, others can only manage users in their tenant
+    let user: UserEntity | null;
+    
     if (currentUserRole === UserRole.SUPERADMIN) {
-      const publicTenant = await this.tenantRepository.findOne({
-        where: { type: TenantType.PUBLIC },
+      user = await this.userRepository.findOne({
+        where: { id },
       });
-      if (publicTenant && publicTenant.id !== tenantId) {
-        tenantIds = [tenantId, publicTenant.id];
-      }
+    } else {
+      user = await this.userRepository.findOne({
+        where: { id, tenantId },
+      });
     }
-
-    const user = await this.userRepository.findOne({
-      where: { id, tenantId: In(tenantIds) },
-    });
 
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -153,21 +150,18 @@ export class UserService {
   }
 
   async deleteUser(id: string, tenantId: string, currentUserId: string, currentUserRole: UserRole): Promise<void> {
-    // Only SUPERADMIN can manage public tenant users
-    let tenantIds = [tenantId];
-
+    // SUPERADMIN can delete any user, others can only delete users in their tenant
+    let user: UserEntity | null;
+    
     if (currentUserRole === UserRole.SUPERADMIN) {
-      const publicTenant = await this.tenantRepository.findOne({
-        where: { type: TenantType.PUBLIC },
+      user = await this.userRepository.findOne({
+        where: { id },
       });
-      if (publicTenant && publicTenant.id !== tenantId) {
-        tenantIds = [tenantId, publicTenant.id];
-      }
+    } else {
+      user = await this.userRepository.findOne({
+        where: { id, tenantId },
+      });
     }
-
-    const user = await this.userRepository.findOne({
-      where: { id, tenantId: In(tenantIds) },
-    });
 
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -192,21 +186,18 @@ export class UserService {
     courseIds: string[],
     deleteCertificates: boolean = false,
   ): Promise<void> {
-    // Only SUPERADMIN can manage public tenant users
-    let tenantIds = [tenantId];
-
+    // SUPERADMIN can manage any user, others can only manage users in their tenant
+    let user: UserEntity | null;
+    
     if (currentUserRole === UserRole.SUPERADMIN) {
-      const publicTenant = await this.tenantRepository.findOne({
-        where: { type: TenantType.PUBLIC },
+      user = await this.userRepository.findOne({
+        where: { id: userId },
       });
-      if (publicTenant && publicTenant.id !== tenantId) {
-        tenantIds = [tenantId, publicTenant.id];
-      }
+    } else {
+      user = await this.userRepository.findOne({
+        where: { id: userId, tenantId },
+      });
     }
-
-    const user = await this.userRepository.findOne({
-      where: { id: userId, tenantId: In(tenantIds) },
-    });
 
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
@@ -252,22 +243,18 @@ export class UserService {
   }
 
   async getUserEnrollments(userId: string, tenantId: string, currentUserRole: UserRole): Promise<EnrollmentEntity[]> {
-    // Only SUPERADMIN can view public tenant user enrollments
-    let tenantIds = [tenantId];
-
+    // SUPERADMIN can view any user's enrollments, others can only view users in their tenant
+    let user: UserEntity | null;
+    
     if (currentUserRole === UserRole.SUPERADMIN) {
-      const publicTenant = await this.tenantRepository.findOne({
-        where: { type: TenantType.PUBLIC },
+      user = await this.userRepository.findOne({
+        where: { id: userId },
       });
-      if (publicTenant && publicTenant.id !== tenantId) {
-        tenantIds = [tenantId, publicTenant.id];
-      }
+    } else {
+      user = await this.userRepository.findOne({
+        where: { id: userId, tenantId },
+      });
     }
-
-    // Verify user exists and is accessible
-    const user = await this.userRepository.findOne({
-      where: { id: userId, tenantId: In(tenantIds) },
-    });
 
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
