@@ -62,21 +62,17 @@ export class UserService {
   }
 
   async getUsersByTenant(tenantId: string, currentUserRole: UserRole): Promise<UserEntity[]> {
-    // Only SUPERADMIN can see public tenant users
-    let tenantIds = [tenantId];
-
+    // SUPERADMIN can see ALL users across ALL tenants
     if (currentUserRole === UserRole.SUPERADMIN) {
-      const publicTenant = await this.tenantRepository.findOne({
-        where: { type: TenantType.PUBLIC },
+      return await this.userRepository.find({
+        relations: ['tenant', 'group'],
+        order: { createdAt: 'DESC' },
       });
-
-      if (publicTenant && publicTenant.id !== tenantId) {
-        tenantIds = [tenantId, publicTenant.id];
-      }
     }
 
+    // Regular admins can only see users from their own tenant
     return await this.userRepository.find({
-      where: { tenantId: In(tenantIds) },
+      where: { tenantId },
       relations: ['tenant', 'group'],
       order: { createdAt: 'DESC' },
     });
