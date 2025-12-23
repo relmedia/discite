@@ -27,6 +27,7 @@ export interface UpdateUserDto {
   email?: string;
   role?: UserRole;
   groupId?: string | null;
+  tenantId?: string;
 }
 
 export interface UserEnrollment {

@@ -17,5 +17,9 @@ export class UpdateUserDto {
   @IsOptional()
   @IsUUID()
   groupId?: string | null;
+
+  @IsOptional()
+  @IsUUID()
+  tenantId?: string;
 }
 

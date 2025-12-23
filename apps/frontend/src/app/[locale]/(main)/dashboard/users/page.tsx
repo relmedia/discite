@@ -71,6 +71,7 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import { usersApi, User, UpdateUserDto, UserEnrollment } from "@/lib/api/users";
+import { tenantsApi, Tenant } from "@/lib/api/tenants";
 import { useAuth } from "@/hooks/use-auth";
 import { useTranslations } from "@/components/intl-provider";
 import { UserRole } from "@repo/shared";
@@ -109,6 +110,9 @@ export default function UsersPage() {
   const isSuperAdmin = currentUser?.role === "SUPERADMIN";
   const isAdmin = currentUser?.role === "ADMIN" || isSuperAdmin;
 
+  // Tenants for superadmin to change user's tenant
+  const [tenants, setTenants] = useState<Tenant[]>([]);
+
   useEffect(() => {
     // Don't show permission error if user is logged out - let middleware handle redirect
     if (!isAuthLoading && !currentUser) {
@@ -119,8 +123,20 @@ export default function UsersPage() {
       router.push("/dashboard");
     } else if (!isAuthLoading && isAdmin) {
       fetchUsers();
+      if (currentUser?.role === "SUPERADMIN") {
+        fetchTenants();
+      }
     }
   }, [isAuthLoading, isAdmin, currentUser, router, t]);
+
+  const fetchTenants = async () => {
+    try {
+      const data = await tenantsApi.getAllTenants();
+      setTenants(data);
+    } catch (error: any) {
+      console.error("Failed to load tenants:", error);
+    }
+  };
 
   const fetchUsers = async () => {
     try {
@@ -174,6 +190,7 @@ export default function UsersPage() {
       email: user.email,
       role: user.role,
       groupId: user.groupId,
+      tenantId: user.tenantId,
     });
   };
 
@@ -780,6 +797,27 @@ export default function UsersPage() {
                 </SelectContent>
               </Select>
             </div>
+            {isSuperAdmin && tenants.length > 0 && (
+              <div className="space-y-2">
+                <Label>{t("users.tenant")}</Label>
+                <Select
+                  value={editForm.tenantId || ""}
+                  onValueChange={(v) => setEditForm({ ...editForm, tenantId: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("users.selectTenant")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {tenants.map((tenant) => (
+                      <SelectItem key={tenant.id} value={tenant.id}>
+                        {tenant.name} ({tenant.subdomain})
+                        {tenant.type === "PUBLIC" && " - Public"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditUser(null)}>

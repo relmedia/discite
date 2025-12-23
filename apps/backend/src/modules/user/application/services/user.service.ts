@@ -123,11 +123,35 @@ export class UserService {
       }
     }
 
+    // Only SUPERADMIN can change a user's tenant
+    if (dto.tenantId !== undefined && dto.tenantId !== user.tenantId) {
+      if (currentUserRole !== UserRole.SUPERADMIN) {
+        throw new ForbiddenException('Only SUPERADMIN can change user tenant');
+      }
+      
+      // Verify the target tenant exists
+      const targetTenant = await this.tenantRepository.findOne({
+        where: { id: dto.tenantId },
+      });
+      if (!targetTenant) {
+        throw new NotFoundException(`Tenant with ID ${dto.tenantId} not found`);
+      }
+
+      // Check for email uniqueness in the new tenant
+      const existingInNewTenant = await this.userRepository.findOne({
+        where: { email: dto.email || user.email, tenantId: dto.tenantId },
+      });
+      if (existingInNewTenant) {
+        throw new ConflictException('Email already in use in the target tenant');
+      }
+    }
+
     // Update fields
     if (dto.name !== undefined) user.name = dto.name;
     if (dto.email !== undefined) user.email = dto.email;
     if (dto.role !== undefined) user.role = dto.role;
     if (dto.groupId !== undefined) user.groupId = dto.groupId;
+    if (dto.tenantId !== undefined) user.tenantId = dto.tenantId;
 
     return await this.userRepository.save(user);
   }
