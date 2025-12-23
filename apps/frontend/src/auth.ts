@@ -44,8 +44,8 @@ export const authConfig: NextAuthConfig = {
 
         try {
           // Call backend API to validate credentials
-          // tenantSubdomain can be passed from the login form, default to "system" for superadmin
-          const tenantSubdomain = (credentials as any).tenantSubdomain || "system";
+          // tenantSubdomain is optional - backend will auto-detect from email if not provided
+          const tenantSubdomain = (credentials as any).tenantSubdomain;
           
           const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
             method: "POST",
@@ -53,7 +53,7 @@ export const authConfig: NextAuthConfig = {
             body: JSON.stringify({
               email: credentials.email,
               password: credentials.password,
-              tenantSubdomain,
+              ...(tenantSubdomain && { tenantSubdomain }),
             }),
           });
 
