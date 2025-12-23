@@ -156,4 +156,42 @@ export class AuthController {
       message: 'Returned to original user successfully',
     };
   }
+
+  @Public()
+  @Post('forgot-password')
+  async forgotPassword(
+    @Body() body: { email: string },
+  ): Promise<ApiResponse<any>> {
+    const result = await this.authService.forgotPassword(body.email);
+
+    // Always return success to prevent email enumeration
+    // The actual email sending would be handled by a separate service
+    if (result) {
+      // In a real implementation, you would send an email here
+      // For now, we'll just return success
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const resetUrl = `${frontendUrl}/reset-password?token=${result.token}`;
+      
+      // Log the reset URL for testing (remove in production)
+      console.log(`Password reset URL for ${body.email}: ${resetUrl}`);
+    }
+
+    return {
+      success: true,
+      message: 'If an account with that email exists, a password reset link has been sent.',
+    };
+  }
+
+  @Public()
+  @Post('reset-password')
+  async resetPassword(
+    @Body() body: { token: string; password: string },
+  ): Promise<ApiResponse<any>> {
+    await this.authService.resetPassword(body.token, body.password);
+
+    return {
+      success: true,
+      message: 'Password has been reset successfully. You can now login with your new password.',
+    };
+  }
 }

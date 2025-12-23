@@ -55,6 +55,12 @@ import {
     @Column({ nullable: true })
     passwordHash: string;
 
+    @Column({ nullable: true })
+    passwordResetToken: string;
+
+    @Column({ type: 'timestamp', nullable: true })
+    passwordResetExpires: Date;
+
     @CreateDateColumn()
     createdAt: Date;
 

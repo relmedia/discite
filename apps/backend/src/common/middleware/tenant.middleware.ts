@@ -27,6 +27,8 @@ export class TenantMiddleware implements NestMiddleware {
       '/api/auth/register',
       '/api/auth/oauth',
       '/api/auth/google',
+      '/api/auth/forgot-password',
+      '/api/auth/reset-password',
       '/api/marketplace',
       '/api/payments/webhook',
     ];

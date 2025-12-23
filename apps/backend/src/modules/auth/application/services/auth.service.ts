@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { UserEntity } from '@/infrastructure/database/entities/user.entity';
 import { TenantEntity } from '@/infrastructure/database/entities/tenant.entity';
 import { InvitationEntity, InvitationStatus } from '@/infrastructure/database/entities/invitation.entity';
@@ -513,5 +514,70 @@ export class AuthService {
     }
 
     return this.login(adminUser);
+  }
+
+  /**
+   * Request password reset - generates token and returns it
+   * The calling code should send the email with the reset link
+   */
+  async forgotPassword(email: string): Promise<{ token: string; user: UserEntity } | null> {
+    // Find user by email across all tenants
+    const user = await this.userRepository.findOne({
+      where: { email: email.toLowerCase() },
+      relations: ['tenant'],
+    });
+
+    if (!user) {
+      // Don't reveal if user exists or not for security
+      return null;
+    }
+
+    // Generate a secure random token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    
+    // Hash the token before storing (for security)
+    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+    // Set token and expiry (1 hour from now)
+    user.passwordResetToken = hashedToken;
+    user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    await this.userRepository.save(user);
+
+    // Return unhashed token (will be sent in email) and user info
+    return { token: resetToken, user };
+  }
+
+  /**
+   * Reset password using token
+   */
+  async resetPassword(token: string, newPassword: string): Promise<UserEntity> {
+    // Hash the provided token to compare with stored hash
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    // Find user with valid token
+    const user = await this.userRepository.findOne({
+      where: { passwordResetToken: hashedToken },
+      relations: ['tenant'],
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
+    // Check if token has expired
+    if (!user.passwordResetExpires || user.passwordResetExpires < new Date()) {
+      throw new BadRequestException('Reset token has expired');
+    }
+
+    // Hash the new password
+    const passwordHash = await this.hashPassword(newPassword);
+
+    // Update password and clear reset token
+    user.passwordHash = passwordHash;
+    user.passwordResetToken = null as any;
+    user.passwordResetExpires = null as any;
+
+    return this.userRepository.save(user);
   }
 }
