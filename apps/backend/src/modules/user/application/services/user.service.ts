@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { UserEntity } from '@/infrastructure/database/entities/user.entity';
 import { EnrollmentEntity } from '@/infrastructure/database/entities/enrollment.entity';
-import { TenantEntity, TenantType } from '@/infrastructure/database/entities/tenant.entity';
+import { TenantEntity } from '@/infrastructure/database/entities/tenant.entity';
 import { CertificateEntity } from '@/infrastructure/database/entities/certificate.entity';
 import { CourseEntity } from '@/infrastructure/database/entities/course.entity';
 import { UserAggregate } from '../../domain/user.aggregate';
