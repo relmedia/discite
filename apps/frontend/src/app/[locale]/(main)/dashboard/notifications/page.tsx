@@ -190,7 +190,7 @@ export default function NotificationsPage() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder={t('notifications.search') || 'Search notifications...'}
+                placeholder="Search notifications..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
@@ -286,7 +286,7 @@ export default function NotificationsPage() {
                           href={notification.link}
                           className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-2"
                         >
-                          {t('notifications.viewDetails') || 'View details'}
+                          View details
                           <ExternalLink className="h-3 w-3" />
                         </Link>
                       )}
