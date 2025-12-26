@@ -28,6 +28,8 @@ const nextConfig = {
       },
     ],
   },
+  // Add empty turbopack config to silence the warning
+  turbopack: {},
   webpack: (config, { isServer }) => {
     // Don't try to bundle canvas-confetti on the server
     if (isServer) {
