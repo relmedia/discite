@@ -37,6 +37,8 @@ interface QuizViewerModalProps {
   courseId: string;
   enrollmentId?: string;
   onQuizComplete?: (quizId: string, passed: boolean) => void;
+  onNavigateNext?: (quizId: string) => void;
+  onCourseComplete?: () => void;
 }
 
 export function QuizViewerModal({
@@ -46,6 +48,8 @@ export function QuizViewerModal({
   courseId,
   enrollmentId,
   onQuizComplete,
+  onNavigateNext,
+  onCourseComplete,
 }: QuizViewerModalProps) {
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -283,7 +287,8 @@ export function QuizViewerModal({
         open={showResults}
         onOpenChange={(open) => {
           setShowResults(open);
-          if (!open) {
+          if (!open && !quizResult.passed) {
+            // Only close if quiz was not passed
             onOpenChange(false);
           }
         }}
@@ -298,6 +303,20 @@ export function QuizViewerModal({
           setTimeRemaining(quiz.durationMinutes);
           setQuizResult(null);
         }}
+        onNavigateNext={quizResult.passed ? () => {
+          // Close results modal
+          setShowResults(false);
+          
+          // Let parent component handle navigation
+          if (onNavigateNext) {
+            setTimeout(() => {
+              onNavigateNext(quizId);
+            }, 300);
+          } else {
+            // Fallback: just close if no navigation handler
+            onOpenChange(false);
+          }
+        } : undefined}
       />
     )}
     </>

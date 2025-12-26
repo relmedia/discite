@@ -20,6 +20,7 @@ interface QuizResultsModalProps {
   passingScore: number;
   onRetake?: () => void;
   canRetake: boolean;
+  onNavigateNext?: () => void;
 }
 
 export function QuizResultsModal({
@@ -30,6 +31,7 @@ export function QuizResultsModal({
   passingScore,
   onRetake,
   canRetake,
+  onNavigateNext,
 }: QuizResultsModalProps) {
   const percentage = Math.round(result.score);
   const passed = result.passed;
@@ -108,14 +110,22 @@ export function QuizResultsModal({
 
           {/* Actions */}
           <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Close
-            </Button>
-            {!passed && canRetake && onRetake && (
-              <Button onClick={onRetake} className="bg-green-600 hover:bg-green-700">
-                <RotateCcw className="mr-2 h-4 w-4" />
-                Retake Quiz
+            {passed && onNavigateNext ? (
+              <Button onClick={onNavigateNext} className="bg-green-600 hover:bg-green-700">
+                Continue to Next
               </Button>
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => onOpenChange(false)}>
+                  Close
+                </Button>
+                {!passed && canRetake && onRetake && (
+                  <Button onClick={onRetake} className="bg-green-600 hover:bg-green-700">
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    Retake Quiz
+                  </Button>
+                )}
+              </>
             )}
           </div>
         </div>

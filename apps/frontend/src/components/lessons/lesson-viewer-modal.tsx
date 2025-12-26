@@ -51,6 +51,8 @@ interface LessonViewerModalProps {
   enrollmentId?: string;
   onProgressUpdate?: (lessonId: string, completed: boolean) => void;
   onOpenQuiz?: (quizId: string) => void;
+  onNavigateNext?: (lessonId: string) => void;
+  onCourseComplete?: () => void;
 }
 
 export function LessonViewerModal({
@@ -61,6 +63,8 @@ export function LessonViewerModal({
   enrollmentId,
   onProgressUpdate,
   onOpenQuiz,
+  onNavigateNext,
+  onCourseComplete,
 }: LessonViewerModalProps) {
   const [lessons, setLessons] = useState<LessonWithAccess[]>([]);
   const [curriculumItems, setCurriculumItems] = useState<CurriculumItem[]>([]);
@@ -254,10 +258,45 @@ export function LessonViewerModal({
 
       toast.success("Lesson marked as complete!");
 
-      // Auto-advance to next lesson if available
-      if (nextLesson && !nextLesson.isLocked) {
+      // Find current lesson position in curriculum items
+      const currentCurriculumIndex = curriculumItems.findIndex(
+        (item) => item.id === currentLesson.id && item.type === CurriculumItemType.LESSON
+      );
+
+      // Check if there's a next curriculum item (lesson or quiz)
+      const nextCurriculumItem = currentCurriculumIndex >= 0 && currentCurriculumIndex < curriculumItems.length - 1
+        ? curriculumItems[currentCurriculumIndex + 1]
+        : null;
+
+      if (nextCurriculumItem && !nextCurriculumItem.isLocked) {
+        // Navigate to next item
         setTimeout(() => {
-          goToNextLesson();
+          if (nextCurriculumItem.type === CurriculumItemType.LESSON) {
+            // Navigate to next lesson
+            const nextLessonIndex = lessons.findIndex((l) => l.id === nextCurriculumItem.id);
+            if (nextLessonIndex !== -1) {
+              setCurrentLessonIndex(nextLessonIndex);
+            }
+          } else if (nextCurriculumItem.type === CurriculumItemType.QUIZ) {
+            // Close lesson modal and open quiz
+            onOpenChange(false);
+            if (onOpenQuiz) {
+              onOpenQuiz(nextCurriculumItem.id);
+            }
+          }
+        }, 500);
+      } else {
+        // This is the last item - course is complete
+        setTimeout(() => {
+          onOpenChange(false);
+          // Trigger course completion callback if provided
+          if (onNavigateNext) {
+            onNavigateNext(currentLesson.id);
+          } else if (onCourseComplete) {
+            onCourseComplete();
+          } else if (onProgressUpdate) {
+            onProgressUpdate(currentLesson.id, true);
+          }
         }, 500);
       }
     } catch (error: any) {

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { notFound, useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import confetti from "canvas-confetti";
 import {
   BookOpen,
   Clock,
@@ -73,6 +74,8 @@ export default function CoursePage() {
   const [quizModalOpen, setQuizModalOpen] = useState(false);
   const [currentLessonId, setCurrentLessonId] = useState<string | undefined>();
   const [currentQuizId, setCurrentQuizId] = useState<string | undefined>();
+  const [showConfetti, setShowConfetti] = useState(false);
+  const confettiTriggered = useRef(false);
   
   // Purchase dialog state
   const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
@@ -82,6 +85,16 @@ export default function CoursePage() {
   useEffect(() => {
     fetchCourse();
   }, [courseSlug]);
+
+  // Check if course is completed when enrollment is loaded
+  useEffect(() => {
+    if (enrollment && enrollment.progressPercentage === 100 && !confettiTriggered.current) {
+      // Small delay to ensure page is rendered
+      setTimeout(() => {
+        triggerConfetti();
+      }, 500);
+    }
+  }, [enrollment]);
 
   const fetchCourse = async () => {
     try {
@@ -305,6 +318,137 @@ export default function CoursePage() {
 
   const handleQuizComplete = async (quizId: string, passed: boolean) => {
     await handleProgressUpdate();
+    
+    // Check if course is completed after quiz
+    if (passed) {
+      const updatedEnrollments = await coursesApi.getMyEnrollments();
+      const updatedEnrollment = updatedEnrollments.find((e: any) => e.courseId === course?.id);
+      if (updatedEnrollment && updatedEnrollment.progressPercentage === 100) {
+        triggerConfetti();
+      }
+    }
+  };
+
+  const handleCourseComplete = async () => {
+    await handleProgressUpdate();
+    triggerConfetti();
+  };
+
+  const triggerConfetti = () => {
+    if (confettiTriggered.current) return;
+    confettiTriggered.current = true;
+    setShowConfetti(true);
+    
+    const duration = 5000;
+    const animationEnd = Date.now() + duration;
+
+    function randomInRange(min: number, max: number) {
+      return Math.random() * (max - min) + min;
+    }
+
+    const interval: NodeJS.Timeout = setInterval(function() {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      const particleCount = 50 * (timeLeft / duration);
+      
+      // Left side confetti
+      confetti({
+        particleCount,
+        angle: randomInRange(55, 125),
+        spread: randomInRange(50, 70),
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+        colors: ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'],
+        shapes: ['square', 'circle'],
+        gravity: randomInRange(0.4, 0.6),
+        drift: randomInRange(-0.4, 0.4),
+        ticks: 200,
+        decay: randomInRange(0.94, 0.99),
+        startVelocity: randomInRange(20, 45),
+        zIndex: 0,
+      });
+      
+      // Right side confetti
+      confetti({
+        particleCount,
+        angle: randomInRange(55, 125),
+        spread: randomInRange(50, 70),
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+        colors: ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'],
+        shapes: ['square', 'circle'],
+        gravity: randomInRange(0.4, 0.6),
+        drift: randomInRange(-0.4, 0.4),
+        ticks: 200,
+        decay: randomInRange(0.94, 0.99),
+        startVelocity: randomInRange(20, 45),
+        zIndex: 0,
+      });
+    }, 250);
+
+    // Fire confetti from center as well
+    setTimeout(() => {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'],
+        shapes: ['square', 'circle'],
+        gravity: 0.5,
+        ticks: 200,
+        decay: 0.95,
+        startVelocity: 30,
+        zIndex: 0,
+      });
+    }, 100);
+
+    setTimeout(() => {
+      setShowConfetti(false);
+      confettiTriggered.current = false;
+    }, duration);
+  };
+
+  const navigateToNextCurriculumItem = async (currentId: string, currentType: 'lesson' | 'quiz') => {
+    // Refresh curriculum items
+    await fetchLessons();
+    
+    // Build curriculum items list
+    const allItems: Array<{ id: string; type: 'lesson' | 'quiz'; orderIndex: number }> = [
+      ...courseLessons.map(l => ({ id: l.id, type: 'lesson' as const, orderIndex: l.orderIndex })),
+      ...courseQuizzes.map(q => ({ id: q.id, type: 'quiz' as const, orderIndex: q.orderIndex })),
+    ].sort((a, b) => a.orderIndex - b.orderIndex);
+
+    const currentIndex = allItems.findIndex(item => item.id === currentId && item.type === currentType);
+    
+    if (currentIndex >= 0 && currentIndex < allItems.length - 1) {
+      const nextItem = allItems[currentIndex + 1];
+      
+      // Close current modal
+      if (currentType === 'lesson') {
+        setLessonModalOpen(false);
+      } else {
+        setQuizModalOpen(false);
+      }
+      
+      // Open next item
+      setTimeout(() => {
+        if (nextItem.type === 'lesson') {
+          handleOpenLesson(nextItem.id);
+        } else {
+          handleOpenQuiz(nextItem.id);
+        }
+      }, 300);
+    } else {
+      // Last item - course is complete
+      if (currentType === 'lesson') {
+        setLessonModalOpen(false);
+      } else {
+        setQuizModalOpen(false);
+      }
+      await handleCourseComplete();
+    }
   };
 
   const handleProgressUpdate = async (lessonId?: string, completed?: boolean) => {
@@ -797,6 +941,10 @@ export default function CoursePage() {
           enrollmentId={enrollment.id}
           onProgressUpdate={handleProgressUpdate}
           onOpenQuiz={handleOpenQuiz}
+          onNavigateNext={(lessonId) => {
+            navigateToNextCurriculumItem(lessonId, 'lesson');
+          }}
+          onCourseComplete={handleCourseComplete}
         />
       )}
 
@@ -809,6 +957,10 @@ export default function CoursePage() {
           courseId={course.id}
           enrollmentId={enrollment.id}
           onQuizComplete={handleQuizComplete}
+          onNavigateNext={(quizId) => {
+            navigateToNextCurriculumItem(quizId, 'quiz');
+          }}
+          onCourseComplete={handleCourseComplete}
         />
       )}
 
