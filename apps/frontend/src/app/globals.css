@@ -168,3 +168,17 @@ html {
 .disable-transitions * {
   transition: none !important;
 }
+
+/* Impersonation banner offset - pushes sidebar and content down when impersonating */
+html[data-impersonating="true"] [data-slot="sidebar-container"] {
+  top: 2.5rem !important;
+  height: calc(100svh - 2.5rem) !important;
+}
+
+html[data-impersonating="true"] [data-slot="sidebar-gap"] {
+  height: calc(100svh - 2.5rem);
+}
+
+html[data-impersonating="true"] .group\/sidebar-wrapper {
+  padding-top: 2.5rem;
+}
