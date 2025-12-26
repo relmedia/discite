@@ -95,7 +95,7 @@ export function TenantSwitcher() {
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:p-1.5!">
-            <Link prefetch={false} href="/dashboard/default">
+            <Link prefetch={false} href="/dashboard">
               <Command />
               <span className="text-base font-semibold">{APP_CONFIG.name}</span>
             </Link>
