@@ -200,7 +200,7 @@ export default function NotificationsPage() {
               variant={showUnreadOnly ? 'default' : 'outline'}
               onClick={() => setShowUnreadOnly(!showUnreadOnly)}
             >
-              {showUnreadOnly ? t('notifications.showAll') : t('notifications.showUnread')}
+              {showUnreadOnly ? (t('notifications.showAll') || 'Show All') : (t('notifications.showUnread') || 'Show Unread Only')}
             </Button>
           </div>
         </CardHeader>

@@ -16,6 +16,7 @@ import {
   Mail,
   Settings,
   BarChart3,
+  Bell,
   type LucideIcon,
 } from "lucide-react";
 
@@ -76,6 +77,11 @@ export const sidebarItems: NavGroup[] = [
         title: "Messages",
         url: "/dashboard/messages",
         icon: MessageCircle,
+      },
+      {
+        title: "Notifications",
+        url: "/dashboard/notifications",
+        icon: Bell,
       },
       {
         title: "My Certificates",
