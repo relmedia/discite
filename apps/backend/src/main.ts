@@ -50,14 +50,40 @@ async function bootstrap() {
   
   app.enableCors({
     origin: (origin, callback) => {
-      // Allow any localhost origin for development
-      if (!origin || origin.startsWith('http://localhost:')) {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin) {
         callback(null, true);
-      } else if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
+        return;
       }
+      
+      // Allow any localhost origin for development
+      if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+        callback(null, true);
+        return;
+      }
+      
+      // Check against FRONTEND_URL (allow both http and https)
+      if (process.env.FRONTEND_URL) {
+        const frontendDomain = process.env.FRONTEND_URL.replace(/^https?:\/\//, '');
+        const originDomain = origin.replace(/^https?:\/\//, '');
+        
+        if (originDomain === frontendDomain || originDomain === `www.${frontendDomain}`) {
+          callback(null, true);
+          return;
+        }
+      }
+      
+      // In production, also allow the domain from environment
+      if (process.env.NODE_ENV === 'production' && process.env.ALLOWED_ORIGINS) {
+        const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim());
+        if (allowedOrigins.some(allowed => origin.includes(allowed))) {
+          callback(null, true);
+          return;
+        }
+      }
+      
+      console.log(`CORS blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
   });
