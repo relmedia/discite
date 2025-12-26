@@ -1087,7 +1087,7 @@ export default function UsersPage() {
                   onValueChange={(v) => setCreateForm({ ...createForm, tenantId: v })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={t("users.selectTenant") || "Select tenant (optional)"} />
+                    <SelectValue placeholder={t("users.selectTenant") === "users.selectTenant" ? "Select tenant (optional)" : t("users.selectTenant")} />
                   </SelectTrigger>
                   <SelectContent>
                     {tenants.map((tenant) => (
