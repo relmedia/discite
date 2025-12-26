@@ -247,7 +247,7 @@ export default function NotificationsPage() {
                             </p>
                             {!notification.isRead && (
                               <Badge variant="default" className="h-4 px-1.5 text-xs">
-                                {t('notifications.new') || 'New'}
+                                New
                               </Badge>
                             )}
                           </div>
