@@ -22,6 +22,12 @@ export interface User {
   updatedAt: string;
 }
 
+export interface CreateUserDto {
+  name: string;
+  email: string;
+  role?: UserRole;
+}
+
 export interface UpdateUserDto {
   name?: string;
   email?: string;
@@ -52,6 +58,14 @@ export interface UserEnrollment {
 }
 
 export const usersApi = {
+  async createUser(data: CreateUserDto): Promise<User> {
+    const response = await apiClient.post<User>('/api/users', data);
+    if (!response.success) {
+      throw new Error(response.error || 'Failed to create user');
+    }
+    return response.data!;
+  },
+
   async getUsers(): Promise<User[]> {
     const response = await apiClient.get<User[]>('/api/users');
     if (!response.success) {

@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Put, Delete, Body, Param, UseGuards, ForbiddenException } from '@nestjs/common';
 import { UserService } from '../application/services/user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -20,7 +20,13 @@ export class UserController {
   async createUser(
     @Body() dto: CreateUserDto,
     @TenantId() tenantId: string,
+    @CurrentUser('role') currentUserRole: UserRole,
   ): Promise<ApiResponse<any>> {
+    // Only SUPERADMIN can create SUPERADMIN users
+    if (dto.role === UserRole.SUPERADMIN && currentUserRole !== UserRole.SUPERADMIN) {
+      throw new ForbiddenException('Only SUPERADMIN can create SUPERADMIN users');
+    }
+    
     const user = await this.userService.createUser(dto, tenantId);
     return {
       success: true,

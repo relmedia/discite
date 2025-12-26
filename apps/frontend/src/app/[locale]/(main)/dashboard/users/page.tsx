@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   XCircle,
   UserCheck,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -70,7 +71,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
-import { usersApi, User, UpdateUserDto, UserEnrollment } from "@/lib/api/users";
+import { usersApi, User, CreateUserDto, UpdateUserDto, UserEnrollment } from "@/lib/api/users";
 import { tenantsApi, Tenant } from "@/lib/api/tenants";
 import { useAuth } from "@/hooks/use-auth";
 import { useTranslations } from "@/components/intl-provider";
@@ -95,6 +96,15 @@ export default function UsersPage() {
   const [editUser, setEditUser] = useState<User | null>(null);
   const [editForm, setEditForm] = useState<UpdateUserDto>({});
   const [saving, setSaving] = useState(false);
+
+  // Create dialog state
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [createForm, setCreateForm] = useState<CreateUserDto>({
+    name: '',
+    email: '',
+    role: UserRole.STUDENT,
+  });
+  const [creating, setCreating] = useState(false);
 
   // Delete dialog state
   const [deleteUser, setDeleteUser] = useState<User | null>(null);
@@ -309,6 +319,30 @@ export default function UsersPage() {
     }
   };
 
+  const handleCreateUser = async () => {
+    if (!createForm.name || !createForm.email) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    setCreating(true);
+    try {
+      await usersApi.createUser(createForm);
+      toast.success("User created successfully");
+      setCreateDialogOpen(false);
+      setCreateForm({
+        name: '',
+        email: '',
+        role: UserRole.STUDENT,
+      });
+      fetchUsers();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to create user");
+    } finally {
+      setCreating(false);
+    }
+  };
+
   const getRoleBadge = (role: UserRole) => {
     const colors: Record<string, string> = {
       SUPERADMIN: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
@@ -464,6 +498,12 @@ export default function UsersPage() {
             {t("users.manageUsers")}
           </p>
         </div>
+        {isAdmin && (
+          <Button onClick={() => setCreateDialogOpen(true)}>
+            <UserPlus className="mr-2 h-4 w-4" />
+            Add User
+          </Button>
+        )}
       </div>
 
       {/* Stats */}
@@ -983,6 +1023,67 @@ export default function UsersPage() {
               className="bg-orange-600 text-white hover:bg-orange-700"
             >
               {resetting ? t("common.loading") : t("users.resetSelected")} ({selectedCoursesToReset.size})
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create User Dialog */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New User</DialogTitle>
+            <DialogDescription>
+              Create a new user account. The user will receive an email invitation to set their password.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="create-name">Name *</Label>
+              <Input
+                id="create-name"
+                value={createForm.name}
+                onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                placeholder="John Doe"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create-email">Email *</Label>
+              <Input
+                id="create-email"
+                type="email"
+                value={createForm.email}
+                onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+                placeholder="user@example.com"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Role</Label>
+              <Select
+                value={createForm.role || UserRole.STUDENT}
+                onValueChange={(v) => setCreateForm({ ...createForm, role: v as UserRole })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={UserRole.STUDENT}>{t("roles.student")}</SelectItem>
+                  <SelectItem value={UserRole.TRAINER}>{t("roles.trainer")}</SelectItem>
+                  <SelectItem value={UserRole.TEAM_LEADER}>{t("roles.teamLeader")}</SelectItem>
+                  <SelectItem value={UserRole.ADMIN}>{t("roles.admin")}</SelectItem>
+                  {isSuperAdmin && (
+                    <SelectItem value={UserRole.SUPERADMIN}>{t("roles.superadmin")}</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
+              {t("common.cancel")}
+            </Button>
+            <Button onClick={handleCreateUser} disabled={creating}>
+              {creating ? "Creating..." : "Create User"}
             </Button>
           </DialogFooter>
         </DialogContent>
