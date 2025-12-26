@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { notFound, useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { triggerConfetti as triggerConfettiUtil } from "@/lib/confetti";
 import {
   BookOpen,
   Clock,
@@ -335,11 +336,10 @@ export default function CoursePage() {
 
   const triggerConfetti = async () => {
     if (confettiTriggered.current) return;
+    if (typeof window === "undefined") return; // Only run on client side
+    
     confettiTriggered.current = true;
     setShowConfetti(true);
-    
-    // Dynamically import canvas-confetti only on client side
-    const confetti = (await import("canvas-confetti")).default;
     
     const duration = 5000;
     const animationEnd = Date.now() + duration;
@@ -348,7 +348,7 @@ export default function CoursePage() {
       return Math.random() * (max - min) + min;
     }
 
-    const interval: NodeJS.Timeout = setInterval(function() {
+    const interval: NodeJS.Timeout = setInterval(async function() {
       const timeLeft = animationEnd - Date.now();
 
       if (timeLeft <= 0) {
@@ -358,7 +358,7 @@ export default function CoursePage() {
       const particleCount = 50 * (timeLeft / duration);
       
       // Left side confetti
-      confetti({
+      await triggerConfettiUtil({
         particleCount,
         angle: randomInRange(55, 125),
         spread: randomInRange(50, 70),
@@ -374,7 +374,7 @@ export default function CoursePage() {
       });
       
       // Right side confetti
-      confetti({
+      await triggerConfettiUtil({
         particleCount,
         angle: randomInRange(55, 125),
         spread: randomInRange(50, 70),
@@ -391,8 +391,8 @@ export default function CoursePage() {
     }, 250);
 
     // Fire confetti from center as well
-    setTimeout(() => {
-      confetti({
+    setTimeout(async () => {
+      await triggerConfettiUtil({
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },

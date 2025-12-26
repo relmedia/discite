@@ -28,6 +28,14 @@ const nextConfig = {
       },
     ],
   },
+  webpack: (config, { isServer }) => {
+    // Don't try to bundle canvas-confetti on the server
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push("canvas-confetti");
+    }
+    return config;
+  },
 }
 
 export default nextConfig
