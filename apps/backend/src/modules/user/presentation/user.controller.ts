@@ -27,7 +27,12 @@ export class UserController {
       throw new ForbiddenException('Only SUPERADMIN can create SUPERADMIN users');
     }
     
-    const user = await this.userService.createUser(dto, tenantId);
+    // Only SUPERADMIN can specify a different tenant
+    const targetTenantId = dto.tenantId && currentUserRole === UserRole.SUPERADMIN 
+      ? dto.tenantId 
+      : tenantId;
+    
+    const user = await this.userService.createUser(dto, targetTenantId);
     return {
       success: true,
       data: user,

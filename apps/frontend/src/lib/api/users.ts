@@ -26,6 +26,7 @@ export interface CreateUserDto {
   name: string;
   email: string;
   role?: UserRole;
+  tenantId?: string;
 }
 
 export interface UpdateUserDto {

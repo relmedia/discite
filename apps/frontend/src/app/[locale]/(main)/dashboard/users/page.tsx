@@ -103,6 +103,7 @@ export default function UsersPage() {
     name: '',
     email: '',
     role: UserRole.STUDENT,
+    tenantId: undefined,
   });
   const [creating, setCreating] = useState(false);
 
@@ -334,6 +335,7 @@ export default function UsersPage() {
         name: '',
         email: '',
         role: UserRole.STUDENT,
+        tenantId: undefined,
       });
       fetchUsers();
     } catch (error: any) {
@@ -1077,6 +1079,28 @@ export default function UsersPage() {
                 </SelectContent>
               </Select>
             </div>
+            {isSuperAdmin && tenants.length > 0 && (
+              <div className="space-y-2">
+                <Label>Tenant</Label>
+                <Select
+                  value={createForm.tenantId || ""}
+                  onValueChange={(v) => setCreateForm({ ...createForm, tenantId: v || undefined })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("users.selectTenant") || "Select tenant (optional)"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">{t("users.currentTenant") || "Current Tenant"}</SelectItem>
+                    {tenants.map((tenant) => (
+                      <SelectItem key={tenant.id} value={tenant.id}>
+                        {tenant.name} ({tenant.subdomain})
+                        {tenant.type === "PUBLIC" && " - Public"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
