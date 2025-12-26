@@ -4,7 +4,6 @@ import { useEffect, useState, useRef } from "react";
 import { notFound, useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import confetti from "canvas-confetti";
 import {
   BookOpen,
   Clock,
@@ -334,10 +333,13 @@ export default function CoursePage() {
     triggerConfetti();
   };
 
-  const triggerConfetti = () => {
+  const triggerConfetti = async () => {
     if (confettiTriggered.current) return;
     confettiTriggered.current = true;
     setShowConfetti(true);
+    
+    // Dynamically import canvas-confetti only on client side
+    const confetti = (await import("canvas-confetti")).default;
     
     const duration = 5000;
     const animationEnd = Date.now() + duration;
