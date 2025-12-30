@@ -4,6 +4,8 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
+  // Transpile workspace packages
+  transpilePackages: ["@repo/shared"],
   images: {
     remotePatterns: [
       {
