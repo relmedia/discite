@@ -20,9 +20,17 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@/i18n/*": ["./i18n/*"]
+      "@/i18n/*": ["./i18n/*"],
+      "@repo/shared": ["../../packages/shared/src"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next/dev/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts", 
+    "**/*.ts", 
+    "**/*.tsx", 
+    ".next/types/**/*.ts", 
+    ".next/dev/types/**/*.ts",
+    "../../packages/shared/src/**/*"
+  ],
   "exclude": ["node_modules"]
 }
