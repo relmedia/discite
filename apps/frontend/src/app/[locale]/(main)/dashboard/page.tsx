@@ -5,7 +5,13 @@ import { SectionCards } from "./_components/section-cards";
 
 export default function DashboardPage() {
   return (
-    <div className="@container/main flex flex-col gap-4 md:gap-6">
+    <div className="flex flex-1 flex-col gap-4 md:gap-8">
+      <div className="flex flex-col gap-2">
+        <h2 className="text-2xl font-bold tracking-tight">Dashboard</h2>
+        <p className="text-muted-foreground">
+          Here&apos;s an overview of your platform performance and metrics.
+        </p>
+      </div>
       <SectionCards />
       <ChartAreaInteractive />
       <DataTable data={data} />
