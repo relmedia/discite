@@ -58,6 +58,19 @@ export const authConfig: NextAuthConfig = {
           });
 
           if (!response.ok) {
+            const errorText = await response.text();
+            let errorData;
+            try {
+              errorData = JSON.parse(errorText);
+            } catch {
+              errorData = { message: errorText || `HTTP ${response.status}` };
+            }
+            console.error("Backend login error:", {
+              status: response.status,
+              statusText: response.statusText,
+              error: errorData,
+              url: `${BACKEND_URL}/api/auth/login`,
+            });
             return null;
           }
 
@@ -77,9 +90,17 @@ export const authConfig: NextAuthConfig = {
             };
           }
 
+          console.error("Backend login response missing user data:", apiResponse);
           return null;
         } catch (error) {
           console.error("Auth error:", error);
+          if (error instanceof Error) {
+            console.error("Error details:", {
+              message: error.message,
+              stack: error.stack,
+              backendUrl: BACKEND_URL,
+            });
+          }
           return null;
         }
       },
