@@ -182,3 +182,10 @@ html[data-impersonating="true"] [data-slot="sidebar-gap"] {
 html[data-impersonating="true"] .group\/sidebar-wrapper {
   padding-top: 2.5rem;
 }
+
+/* Hide sidebar rail */
+[data-sidebar="rail"],
+[data-slot="sidebar-rail"],
+button[data-sidebar="rail"] {
+  display: none !important;
+}
