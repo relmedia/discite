@@ -1,6 +1,5 @@
 import { DataSource } from 'typeorm';
-import { TenantEntity } from '../entities/tenant.entity';
-import { TenantType } from '@repo/shared';
+import { TenantEntity, TenantType } from '../entities/tenant.entity';
 
 export async function seedPublicTenant(dataSource: DataSource) {
   const tenantRepo = dataSource.getRepository(TenantEntity);
