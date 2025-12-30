@@ -65,12 +65,18 @@ export const authConfig: NextAuthConfig = {
             } catch {
               errorData = { message: errorText || `HTTP ${response.status}` };
             }
-            console.error("Backend login error:", {
+            console.error("🔴 Backend login error:", {
               status: response.status,
               statusText: response.statusText,
               error: errorData,
               url: `${BACKEND_URL}/api/auth/login`,
+              email: credentials.email,
             });
+            console.error("💡 Troubleshooting tips:");
+            console.error("   1. Check if superadmin user exists (run: cd apps/backend && pnpm seed)");
+            console.error("   2. Default credentials: superadmin@discite.com / SuperAdmin@123");
+            console.error("   3. Verify backend is running on:", BACKEND_URL);
+            console.error("   4. Check backend console for additional error details");
             return null;
           }
 
@@ -79,6 +85,7 @@ export const authConfig: NextAuthConfig = {
           // Backend wraps response in ApiResponse { success, data, message }
           if (apiResponse.success && apiResponse.data?.user) {
             const { user, tenant, access_token } = apiResponse.data;
+            console.log("✅ Login successful for:", user.email, "Role:", user.role);
             return {
               id: user.id,
               email: user.email,
@@ -90,16 +97,27 @@ export const authConfig: NextAuthConfig = {
             };
           }
 
-          console.error("Backend login response missing user data:", apiResponse);
+          console.error("🔴 Backend login response missing user data:", apiResponse);
+          console.error("💡 Response structure:", {
+            success: apiResponse.success,
+            hasData: !!apiResponse.data,
+            hasUser: !!apiResponse.data?.user,
+            message: apiResponse.message,
+          });
           return null;
         } catch (error) {
-          console.error("Auth error:", error);
+          console.error("🔴 Auth network error:", error);
           if (error instanceof Error) {
             console.error("Error details:", {
               message: error.message,
               stack: error.stack,
               backendUrl: BACKEND_URL,
+              email: credentials.email,
             });
+            console.error("💡 Troubleshooting tips:");
+            console.error("   1. Verify backend is running on:", BACKEND_URL);
+            console.error("   2. Check if BACKEND_INTERNAL_URL is set correctly");
+            console.error("   3. Verify network connectivity to backend");
           }
           return null;
         }
