@@ -25,6 +25,11 @@ export class RolesGuard implements CanActivate {
       throw new ForbiddenException('User role information is missing');
     }
 
+    // SUPERADMIN has all privileges and can access any endpoint
+    if (user.role === UserRole.SUPERADMIN) {
+      return true;
+    }
+
     const hasRole = requiredRoles.some((role) => hasMinimumRole(user.role, role));
 
     if (!hasRole) {
