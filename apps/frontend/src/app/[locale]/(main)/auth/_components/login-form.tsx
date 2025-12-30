@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -38,6 +38,24 @@ export function LoginForm() {
     },
   });
 
+  // Suppress password manager extension errors
+  useEffect(() => {
+    const errorHandler = (event: ErrorEvent) => {
+      // Suppress errors from password manager extensions trying to access username field
+      if (
+        event.error?.message?.includes("username") ||
+        event.error?.stack?.includes("bootstrap-autofill-overlay") ||
+        event.error?.stack?.includes("AutofillOverlay")
+      ) {
+        event.preventDefault();
+        return false;
+      }
+    };
+
+    window.addEventListener("error", errorHandler);
+    return () => window.removeEventListener("error", errorHandler);
+  }, []);
+
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     setIsLoading(true);
 
@@ -69,7 +87,11 @@ export function LoginForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form 
+        onSubmit={form.handleSubmit(onSubmit)} 
+        className="space-y-4" 
+        autoComplete="on"
+      >
         <FormField
           control={form.control}
           name="email"
@@ -79,9 +101,10 @@ export function LoginForm() {
               <FormControl>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="you@example.com"
-                  autoComplete="email"
+                  autoComplete="username"
                   disabled={isLoading}
                   {...field}
                 />
@@ -107,6 +130,7 @@ export function LoginForm() {
               <FormControl>
                 <Input
                   id="password"
+                  name="password"
                   type="password"
                   placeholder="••••••••"
                   autoComplete="current-password"
