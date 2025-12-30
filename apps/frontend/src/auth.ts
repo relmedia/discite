@@ -47,6 +47,12 @@ export const authConfig: NextAuthConfig = {
           // tenantSubdomain is optional - backend will auto-detect from email if not provided
           const tenantSubdomain = (credentials as any).tenantSubdomain;
           
+          console.log("🔵 Attempting login:", {
+            email: credentials.email,
+            backendUrl: BACKEND_URL,
+            url: `${BACKEND_URL}/api/auth/login`,
+          });
+          
           const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -57,15 +63,58 @@ export const authConfig: NextAuthConfig = {
             }),
           });
 
+          console.log("🔵 Response status:", response.status, response.statusText);
+          console.log("🔵 Response headers:", Object.fromEntries(response.headers.entries()));
+
           if (!response.ok) {
+            const errorText = await response.text();
+            let errorData;
+            try {
+              errorData = JSON.parse(errorText);
+            } catch {
+              errorData = { message: errorText || `HTTP ${response.status}` };
+            }
+            console.error("🔴 Backend login error:", {
+              status: response.status,
+              statusText: response.statusText,
+              error: errorData,
+              url: `${BACKEND_URL}/api/auth/login`,
+              email: credentials.email,
+            });
+            console.error("💡 Troubleshooting tips:");
+            console.error("   1. Check if superadmin user exists (run: cd apps/backend && pnpm seed)");
+            console.error("   2. Default credentials: superadmin@discite.com / SuperAdmin@123");
+            console.error("   3. Verify backend is running on:", BACKEND_URL);
+            console.error("   4. Check backend console for additional error details");
             return null;
           }
 
-          const apiResponse = await response.json();
+          const responseText = await response.text();
+          console.log("🔵 Response body (raw):", responseText);
+          
+          let apiResponse;
+          try {
+            apiResponse = JSON.parse(responseText);
+          } catch (parseError) {
+            console.error("🔴 Failed to parse response as JSON:", parseError);
+            console.error("🔴 Raw response:", responseText);
+            return null;
+          }
+          
+          console.log("🔵 Parsed response:", JSON.stringify(apiResponse, null, 2));
 
           // Backend wraps response in ApiResponse { success, data, message }
+          console.log("🔵 Checking response structure:", {
+            success: apiResponse.success,
+            hasData: !!apiResponse.data,
+            hasUser: !!apiResponse.data?.user,
+            dataKeys: apiResponse.data ? Object.keys(apiResponse.data) : [],
+            message: apiResponse.message,
+          });
+          
           if (apiResponse.success && apiResponse.data?.user) {
             const { user, tenant, access_token } = apiResponse.data;
+            console.log("✅ Login successful for:", user.email, "Role:", user.role);
             return {
               id: user.id,
               email: user.email,
@@ -77,9 +126,28 @@ export const authConfig: NextAuthConfig = {
             };
           }
 
+          console.error("🔴 Backend login response missing user data:", apiResponse);
+          console.error("💡 Full response structure:", JSON.stringify(apiResponse, null, 2));
+          console.error("💡 Troubleshooting:");
+          console.error("   - Response success:", apiResponse.success);
+          console.error("   - Has data:", !!apiResponse.data);
+          console.error("   - Has user:", !!apiResponse.data?.user);
+          console.error("   - Message:", apiResponse.message);
           return null;
         } catch (error) {
-          console.error("Auth error:", error);
+          console.error("🔴 Auth network error:", error);
+          if (error instanceof Error) {
+            console.error("Error details:", {
+              message: error.message,
+              stack: error.stack,
+              backendUrl: BACKEND_URL,
+              email: credentials.email,
+            });
+            console.error("💡 Troubleshooting tips:");
+            console.error("   1. Verify backend is running on:", BACKEND_URL);
+            console.error("   2. Check if BACKEND_INTERNAL_URL is set correctly");
+            console.error("   3. Verify network connectivity to backend");
+          }
           return null;
         }
       },
